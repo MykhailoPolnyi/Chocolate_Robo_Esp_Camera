@@ -286,119 +286,6 @@ static esp_err_t stream_handler(httpd_req_t *req)
                     _jpg_buf_len = fb->len;
                     _jpg_buf = fb->buf;
                 }
-#if CONFIG_ESP_FACE_DETECT_ENABLED
-            }
-            else
-            {
-                if (fb->format == PIXFORMAT_RGB565
-#if CONFIG_ESP_FACE_RECOGNITION_ENABLED
-                    && !recognition_enabled
-#endif
-                ){
-#if ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
-                    fr_ready = esp_timer_get_time();
-#endif
-#if TWO_STAGE
-                    std::list<dl::detect::result_t> &candidates = s1.infer((uint16_t *)fb->buf, {(int)fb->height, (int)fb->width, 3});
-                    std::list<dl::detect::result_t> &results = s2.infer((uint16_t *)fb->buf, {(int)fb->height, (int)fb->width, 3}, candidates);
-#else
-                    std::list<dl::detect::result_t> &results = s1.infer((uint16_t *)fb->buf, {(int)fb->height, (int)fb->width, 3});
-#endif
-#if CONFIG_ESP_FACE_DETECT_ENABLED && ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
-                    fr_face = esp_timer_get_time();
-                    fr_recognize = fr_face;
-#endif
-                    if (results.size() > 0) {
-                        fb_data_t rfb;
-                        rfb.width = fb->width;
-                        rfb.height = fb->height;
-                        rfb.data = fb->buf;
-                        rfb.bytes_per_pixel = 2;
-                        rfb.format = FB_RGB565;
-#if ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
-                        detected = true;
-#endif
-                        draw_face_boxes(&rfb, &results, face_id);
-                    }
-                    s = fmt2jpg(fb->buf, fb->len, fb->width, fb->height, PIXFORMAT_RGB565, 80, &_jpg_buf, &_jpg_buf_len);
-                    esp_camera_fb_return(fb);
-                    fb = NULL;
-                    if (!s) {
-                        log_e("fmt2jpg failed");
-                        res = ESP_FAIL;
-                    }
-#if CONFIG_ESP_FACE_DETECT_ENABLED && ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
-                    fr_encode = esp_timer_get_time();
-#endif
-                } else
-                {
-                    out_len = fb->width * fb->height * 3;
-                    out_width = fb->width;
-                    out_height = fb->height;
-                    out_buf = (uint8_t*)malloc(out_len);
-                    if (!out_buf) {
-                        log_e("out_buf malloc failed");
-                        res = ESP_FAIL;
-                    } else {
-                        s = fmt2rgb888(fb->buf, fb->len, fb->format, out_buf);
-                        esp_camera_fb_return(fb);
-                        fb = NULL;
-                        if (!s) {
-                            free(out_buf);
-                            log_e("To rgb888 failed");
-                            res = ESP_FAIL;
-                        } else {
-#if ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
-                            fr_ready = esp_timer_get_time();
-#endif
-
-                            fb_data_t rfb;
-                            rfb.width = out_width;
-                            rfb.height = out_height;
-                            rfb.data = out_buf;
-                            rfb.bytes_per_pixel = 3;
-                            rfb.format = FB_BGR888;
-
-#if TWO_STAGE
-                            std::list<dl::detect::result_t> &candidates = s1.infer((uint8_t *)out_buf, {(int)out_height, (int)out_width, 3});
-                            std::list<dl::detect::result_t> &results = s2.infer((uint8_t *)out_buf, {(int)out_height, (int)out_width, 3}, candidates);
-#else
-                            std::list<dl::detect::result_t> &results = s1.infer((uint8_t *)out_buf, {(int)out_height, (int)out_width, 3});
-#endif
-
-#if CONFIG_ESP_FACE_DETECT_ENABLED && ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
-                            fr_face = esp_timer_get_time();
-                            fr_recognize = fr_face;
-#endif
-
-                            if (results.size() > 0) {
-#if ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
-                                detected = true;
-#endif
-#if CONFIG_ESP_FACE_RECOGNITION_ENABLED
-                                if (recognition_enabled) {
-                                    face_id = run_face_recognition(&rfb, &results);
-    #if ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
-                                    fr_recognize = esp_timer_get_time();
-    #endif
-                                }
-#endif
-                                draw_face_boxes(&rfb, &results, face_id);
-                            }
-                            s = fmt2jpg(out_buf, out_len, out_width, out_height, PIXFORMAT_RGB888, 90, &_jpg_buf, &_jpg_buf_len);
-                            free(out_buf);
-                            if (!s) {
-                                log_e("fmt2jpg failed");
-                                res = ESP_FAIL;
-                            }
-#if CONFIG_ESP_FACE_DETECT_ENABLED && ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
-                            fr_encode = esp_timer_get_time();
-#endif
-                        }
-                    }
-                }
-            }
-#endif
         }
         if (res == ESP_OK)
         {
@@ -431,32 +318,16 @@ static esp_err_t stream_handler(httpd_req_t *req)
         }
         int64_t fr_end = esp_timer_get_time();
 
-#if CONFIG_ESP_FACE_DETECT_ENABLED && ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
-        int64_t ready_time = (fr_ready - fr_start) / 1000;
-        int64_t face_time = (fr_face - fr_ready) / 1000;
-        int64_t recognize_time = (fr_recognize - fr_face) / 1000;
-        int64_t encode_time = (fr_encode - fr_recognize) / 1000;
-        int64_t process_time = (fr_encode - fr_start) / 1000;
-#endif
-
         int64_t frame_time = fr_end - last_frame;
         frame_time /= 1000;
 #if ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
         uint32_t avg_frame_time = ra_filter_run(&ra_filter, frame_time);
 #endif
         log_i("MJPG: %uB %ums (%.1ffps), AVG: %ums (%.1ffps)"
-#if CONFIG_ESP_FACE_DETECT_ENABLED
-                      ", %u+%u+%u+%u=%u %s%d"
-#endif
                  ,
                  (uint32_t)(_jpg_buf_len),
                  (uint32_t)frame_time, 1000.0 / (uint32_t)frame_time,
                  avg_frame_time, 1000.0 / avg_frame_time
-#if CONFIG_ESP_FACE_DETECT_ENABLED
-                 ,
-                 (uint32_t)ready_time, (uint32_t)face_time, (uint32_t)recognize_time, (uint32_t)encode_time, (uint32_t)process_time,
-                 (detected) ? "DETECTED " : "", face_id
-#endif
         );
     }
 
@@ -571,28 +442,6 @@ static esp_err_t cmd_handler(httpd_req_t *req)
     }
 #endif
 
-#if CONFIG_ESP_FACE_DETECT_ENABLED
-    else if (!strcmp(variable, "face_detect")) {
-        detection_enabled = val;
-#if CONFIG_ESP_FACE_RECOGNITION_ENABLED
-        if (!detection_enabled) {
-            recognition_enabled = 0;
-        }
-#endif
-    }
-#if CONFIG_ESP_FACE_RECOGNITION_ENABLED
-    else if (!strcmp(variable, "face_enroll")){
-        is_enrolling = !is_enrolling;
-        log_i("Enrolling: %s", is_enrolling?"true":"false");
-    }
-    else if (!strcmp(variable, "face_recognize")) {
-        recognition_enabled = val;
-        if (recognition_enabled) {
-            detection_enabled = val;
-        }
-    }
-#endif
-#endif
     else {
         log_i("Unknown command: %s", variable);
         res = -1;
@@ -677,13 +526,6 @@ static esp_err_t status_handler(httpd_req_t *req)
     p += sprintf(p, ",\"led_intensity\":%u", led_duty);
 #else
     p += sprintf(p, ",\"led_intensity\":%d", -1);
-#endif
-#if CONFIG_ESP_FACE_DETECT_ENABLED
-    p += sprintf(p, ",\"face_detect\":%u", detection_enabled);
-#if CONFIG_ESP_FACE_RECOGNITION_ENABLED
-    p += sprintf(p, ",\"face_enroll\":%u,", is_enrolling);
-    p += sprintf(p, "\"face_recognize\":%u", recognition_enabled);
-#endif
 #endif
     *p++ = '}';
     *p++ = 0;
@@ -1026,12 +868,6 @@ void startCameraServer()
 
     ra_filter_init(&ra_filter, 20);
 
-#if CONFIG_ESP_FACE_RECOGNITION_ENABLED
-    recognizer.set_partition(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, "fr");
-
-    // load ids from flash partition
-    recognizer.set_ids_from_flash();
-#endif
     log_i("Starting web server on port: '%d'", config.server_port);
     if (httpd_start(&camera_httpd, &config) == ESP_OK)
     {
