@@ -1,5 +1,5 @@
-#ifndef CAMERA_STREAM_HANDLER
-#define CAMERA_STREAM_HANDLER
+#if !defined(ESP32_CAMERA_COMMAND_HANDLER)
+#define ESP32_CAMERA_COMMAND_HANDLER
 
 #include "esp_http_server.h"
 #include "esp_timer.h"
@@ -11,6 +11,6 @@
 #include "esp32-hal-log.h"
 #endif
 
-void setupStreamHandler(httpd_handle_t stream_httpd);
+void setupCommandHandler(httpd_handle_t command_httpd);
 
-#endif // !CAMERA_STREAM_HANDLER
+#endif // ESP32_CAMERA_COMMAND_HANDLER

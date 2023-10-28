@@ -21,7 +21,8 @@
 #include "esp32-hal-log.h"
 #endif
 
-#include "stream_handler.h"
+#include "src/stream/stream_handler.h"
+#include "src/command/command_handler.h"
 
 // Enable LED FLASH setting
 #define CONFIG_LED_ILLUMINATOR_ENABLED 1
@@ -63,6 +64,7 @@ void startCameraServer()
     if (httpd_start(&stream_httpd, &config) == ESP_OK)
     {
         setupStreamHandler(stream_httpd);
+        setupCommandHandler(stream_httpd);
     }
 }
 
