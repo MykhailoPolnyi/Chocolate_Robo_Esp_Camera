@@ -35,8 +35,8 @@
 // ===========================
 // Enter your WiFi credentials
 // ===========================
-const char* ssid = "Ukrtelecom_497400";
-const char* password = "h1ax3a7n";
+const char* ssid = "25252525_2.4";
+const char* password = "01012015";
 
 void startCameraServer();
 void setupLedFlash(int pin);
