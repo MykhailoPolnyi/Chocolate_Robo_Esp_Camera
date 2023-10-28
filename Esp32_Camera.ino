@@ -1,7 +1,11 @@
+// Libraries
 #include "esp_camera.h"
 #include <WiFi.h>
 #include <esp_timer.h>
 #include <ESP32Servo.h>
+
+// Custom code
+#include "camera_pins.h"
 //
 // WARNING!!! PSRAM IC required for UXGA resolution and high JPEG quality
 //            Ensure ESP32 Wrover Module or other board with PSRAM is selected
@@ -31,8 +35,6 @@
 //#define CAMERA_MODEL_ESP32S3_CAM_LCD
 //#define CAMERA_MODEL_DFRobot_FireBeetle2_ESP32S3 // Has PSRAM
 //#define CAMERA_MODEL_DFRobot_Romeo_ESP32S3 // Has PSRAM
-#include "camera_pins.h"
-#include "servo_interrupt.h"
 
 #define VERTICAL_SERVO_PIN 2
 #define HORIZONTAL_SERVO_PIN 4
@@ -40,8 +42,8 @@
 // ===========================
 // Enter your WiFi credentials
 // ===========================
-const char* ssid = "25252525_2.4";
-const char* password = "01012015";
+const char* ssid = "";
+const char* password = "";
 
 void startCameraServer();
 void setupLedFlash(int pin);
