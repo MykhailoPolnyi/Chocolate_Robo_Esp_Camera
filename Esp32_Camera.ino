@@ -1,6 +1,7 @@
 #include "esp_camera.h"
 #include <WiFi.h>
-
+#include <esp_timer.h>
+#include <ESP32Servo.h>
 //
 // WARNING!!! PSRAM IC required for UXGA resolution and high JPEG quality
 //            Ensure ESP32 Wrover Module or other board with PSRAM is selected
@@ -31,6 +32,10 @@
 //#define CAMERA_MODEL_DFRobot_FireBeetle2_ESP32S3 // Has PSRAM
 //#define CAMERA_MODEL_DFRobot_Romeo_ESP32S3 // Has PSRAM
 #include "camera_pins.h"
+#include "servo_interrupt.h"
+
+#define VERTICAL_SERVO_PIN 2
+#define HORIZONTAL_SERVO_PIN 4
 
 // ===========================
 // Enter your WiFi credentials
@@ -41,10 +46,57 @@ const char* password = "01012015";
 void startCameraServer();
 void setupLedFlash(int pin);
 
+Servo verticalServo;
+Servo horizontalServo;
+
+// Servo control variables
+int verticalAngle = 5;
+int horizontalAngle = 5;
+int verticalStep = 5;
+int horizontalStep = 5;
+
+void IRAM_ATTR timer_interrupt(void* arg)
+{
+  if(verticalAngle <= 0 || verticalAngle >= 120){
+    verticalStep = (-1)*verticalStep;
+  }
+
+  if(horizontalAngle <= 0 || horizontalAngle >= 120){
+    horizontalStep = (-1)*horizontalStep;
+  }
+  
+  horizontalAngle += horizontalStep;
+  verticalAngle += verticalStep;
+  
+  verticalServo.write(verticalAngle);
+  horizontalServo.write(horizontalAngle);
+  Serial.println(verticalAngle);
+  Serial.println(horizontalAngle);
+}
+
+esp_timer_handle_t timer;
+const esp_timer_create_args_t timer_args = {
+    .callback = &timer_interrupt,
+    .name = "servo_timer",
+};
+
+// Set the timer period in microseconds (e.g., 1 second = 1000000 microseconds)
+int64_t timer_period = 1500000; // 15 miliseconds
+
 void setup() {
   Serial.begin(115200);
   Serial.setDebugOutput(true);
   Serial.println();
+
+  // Servos setup
+  verticalServo.attach(VERTICAL_SERVO_PIN);
+  verticalServo.write(verticalAngle);
+  horizontalServo.attach(HORIZONTAL_SERVO_PIN);
+  horizontalServo.write(horizontalAngle);
+
+  // Timer setup
+  ESP_ERROR_CHECK(esp_timer_create(&timer_args, &timer));
+  ESP_ERROR_CHECK(esp_timer_start_periodic(timer, timer_period));
 
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
