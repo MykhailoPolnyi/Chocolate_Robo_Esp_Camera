@@ -1,15 +1,5 @@
 #include "command_handler.h"
 
-#include "esp_http_server.h"
-#include "esp_timer.h"
-
-#include "esp_camera.h"
-#include "esp32-hal-ledc.h"
-
-#if defined(ARDUINO_ARCH_ESP32) && defined(CONFIG_ARDUHAL_ESP_LOG)
-#include "esp32-hal-log.h"
-#endif
-
 #include "command.h"
 
 static esp_err_t parse_get(httpd_req_t *req, char **obuf)
@@ -57,8 +47,10 @@ static esp_err_t command_handler(httpd_req_t* req)
         return ESP_FAIL;
     }
 
+    const char* resp = "Command handled successfully";
+
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
-    return httpd_resp_send(req, NULL, 0);
+    return httpd_resp_send(req, resp, sizeof(resp));
 }
 
 void setupCommandHandler(httpd_handle_t command_httpd)

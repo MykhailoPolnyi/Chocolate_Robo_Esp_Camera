@@ -2,15 +2,9 @@
 
 #include <cstring>
 
+#include "../timer/timer.h"
+
 char* direction = SERVO_CMD_STOP;
-
-static void startTimer() {
-    // TODO
-}
-
-static void stopTimer() {
-    // TODO
-}
 
 int cmd_move(char *new_direction)
 {
