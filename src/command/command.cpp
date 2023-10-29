@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-#include "timer/timer.h"
+#include "../timer/timer.h"
 
 char* direction = NULL;
 

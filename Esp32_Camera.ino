@@ -87,6 +87,11 @@ void IRAM_ATTR timer_interrupt(void* arg)
   }
 }
 
+const esp_timer_create_args_t timer_args = {
+    .callback = &timer_interrupt,
+    .name = "servo_timer",
+};
+
 void setup() {
   Serial.begin(115200);
   Serial.setDebugOutput(true);
@@ -98,7 +103,7 @@ void setup() {
   horizontalServo.attach(HORIZONTAL_SERVO_PIN);
   horizontalServo.write(horizontalAngle);
 
-  setupTimer();
+  setupTimer(timer_args);
   startTimer();
 
   camera_config_t config;
