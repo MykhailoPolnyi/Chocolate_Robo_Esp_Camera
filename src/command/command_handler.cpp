@@ -28,7 +28,7 @@ static esp_err_t parse_get(httpd_req_t *req, char **obuf)
         }
         free(buf);
     }
-    httpd_resp_send_404(req);
+    httpd_resp_send_400(req);
     return ESP_FAIL;
 }
 
@@ -44,9 +44,9 @@ static esp_err_t command_handler(httpd_req_t* req)
 
     if (httpd_query_key_value(buf, cmd_option, value, sizeof(value)) != ESP_OK) {
         free(buf);
-        return httpd_resp_send_500(req);
+        httpd_resp_send_500(req);
+        return ESP_FAIL;
     }
-
     free(buf);
 
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
