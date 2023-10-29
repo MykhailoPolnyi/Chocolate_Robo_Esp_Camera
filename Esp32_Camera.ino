@@ -60,30 +60,31 @@ int horizontalStep = 5;
 // NO 'STOP' command hanling, as it should just stop the interrupt
 void IRAM_ATTR timer_interrupt(void* arg)
 {
+  const char* local_direction = SERVO_CMD_STOP;
   Serial.println("Entering interrupt");
-  if (direction == NULL) {
+  if (local_direction == NULL) {
     Serial.println("Direction is null, no commands still received");
   }
-  if (!strcmp(direction, SERVO_CMD_UP) && verticalAngle < 120) {
+  if (!strcmp(local_direction, SERVO_CMD_UP) && verticalAngle < 120) {
     verticalAngle += verticalStep;
     Serial.print("Moving up, new angle: ");
     Serial.println(verticalAngle);
   }
 
-  if (!strcmp(direction, SERVO_CMD_DOWN) && verticalAngle > 0) {
+  if (!strcmp(local_direction, SERVO_CMD_DOWN) && verticalAngle > 0) {
     verticalAngle -= verticalStep;
     Serial.print("Moving down, new angle: ");
     Serial.println(verticalAngle);
   }
 
   // TODO: CHECK LEFT AND RIGHT ROTATION COMPARISONS
-  if (!strcmp(direction, SERVO_CMD_LEFT) && horizontalAngle < 120) {
+  if (!strcmp(local_direction, SERVO_CMD_LEFT) && horizontalAngle < 120) {
     horizontalAngle += horizontalStep;
     Serial.print("Moving left, new angle: ");
     Serial.println(horizontalAngle);
   }
 
-  if (!strcmp(direction, SERVO_CMD_RIGHT) && horizontalAngle > 0) {
+  if (!strcmp(local_direction, SERVO_CMD_RIGHT) && horizontalAngle > 0) {
     horizontalAngle -= horizontalStep;
     Serial.print("Moving right, new angle: ");
     Serial.println(horizontalAngle);
