@@ -6,13 +6,14 @@
 
 // Custom code
 #include "camera_pins.h"
+#include "src/command/command.h"
 //
 // WARNING!!! PSRAM IC required for UXGA resolution and high JPEG quality
 //            Ensure ESP32 Wrover Module or other board with PSRAM is selected
 //            Partial images will be transmitted if image exceeds buffer size
 //
 //            You must select partition scheme from the board menu that has at least 3MB APP space.
-//            Face Recognition is DISABLED for ESP32 and ESP32-S2, because it takes up from 15 
+//            Face Recognition is DISABLED for ESP32 and ESP32-S2, because it takes up from 15
 //            seconds to process single frame. Face Detection is ENABLED if PSRAM is enabled as well
 
 // ===================
@@ -57,23 +58,33 @@ int horizontalAngle = 5;
 int verticalStep = 5;
 int horizontalStep = 5;
 
+// NO 'STOP' command hanling, as it should just stop the interrupt
 void IRAM_ATTR timer_interrupt(void* arg)
 {
-  if(verticalAngle <= 0 || verticalAngle >= 120){
-    verticalStep = (-1)*verticalStep;
+  if (!strcmp(direction, SERVO_CMD_UP) && verticalAngle < 120) {
+    verticalAngle += verticalStep;
+    Serial.print("Moving up, new angle: ");
+    Serial.println(verticalAngle);
   }
 
-  if(horizontalAngle <= 0 || horizontalAngle >= 120){
-    horizontalStep = (-1)*horizontalStep;
+  if (!strcmp(direction, SERVO_CMD_DOWN) && verticalAngle > 0) {
+    verticalAngle -= verticalStep;
+    Serial.print("Moving down, new angle: ");
+    Serial.println(verticalAngle);
   }
-  
-  horizontalAngle += horizontalStep;
-  verticalAngle += verticalStep;
-  
-  verticalServo.write(verticalAngle);
-  horizontalServo.write(horizontalAngle);
-  Serial.println(verticalAngle);
-  Serial.println(horizontalAngle);
+
+  // TODO: CHECK LEFT AND RIGHT ROTATION COMPARISONS
+  if (!strcmp(direction, SERVO_CMD_LEFT) && horizontalAngle < 120) {
+    horizontalAngle += horizontalStep;
+    Serial.print("Moving left, new angle: ");
+    Serial.println(horizontalAngle);
+  }
+
+  if (!strcmp(direction, SERVO_CMD_RIGHT) && horizontalAngle > 0) {
+    horizontalAngle -= horizontalStep;
+    Serial.print("Moving right, new angle: ");
+    Serial.println(horizontalAngle);
+  }
 }
 
 esp_timer_handle_t timer;
@@ -126,7 +137,7 @@ void setup() {
   config.fb_location = CAMERA_FB_IN_PSRAM;
   config.jpeg_quality = 12;
   config.fb_count = 1;
-  
+
   if(config.pixel_format == PIXFORMAT_JPEG){
     if(psramFound()){
       config.jpeg_quality = 10;
