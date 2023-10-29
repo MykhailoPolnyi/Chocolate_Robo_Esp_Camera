@@ -3,10 +3,6 @@
 #include <WiFi.h>
 #include <esp_timer.h>
 #include <ESP32Servo.h>
-
-// Custom code
-#include "camera_pins.h"
-#include "src/command/command.h"
 //
 // WARNING!!! PSRAM IC required for UXGA resolution and high JPEG quality
 //            Ensure ESP32 Wrover Module or other board with PSRAM is selected
@@ -37,6 +33,9 @@
 //#define CAMERA_MODEL_DFRobot_FireBeetle2_ESP32S3 // Has PSRAM
 //#define CAMERA_MODEL_DFRobot_Romeo_ESP32S3 // Has PSRAM
 
+// Custom code
+#include "camera_pins.h"
+#include "src/command/command.h"
 #define VERTICAL_SERVO_PIN 2
 #define HORIZONTAL_SERVO_PIN 4
 
