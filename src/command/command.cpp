@@ -4,7 +4,7 @@
 
 #include "../timer/timer.h"
 
-char* direction = NULL;
+char* direction = SERVO_CMD_STOP;
 
 int cmd_move(char *new_direction)
 {
@@ -30,4 +30,9 @@ int cmd_move(char *new_direction)
         }
     }
     return 1;
+}
+
+char *get_current_direction()
+{
+    return direction;
 }
