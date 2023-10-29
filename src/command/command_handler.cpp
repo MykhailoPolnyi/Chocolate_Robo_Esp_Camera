@@ -10,6 +10,8 @@
 #include "esp32-hal-log.h"
 #endif
 
+#include "command.h"
+
 static esp_err_t parse_get(httpd_req_t *req, char **obuf)
 {
     char *buf = NULL;
@@ -49,6 +51,11 @@ static esp_err_t command_handler(httpd_req_t* req)
         return ESP_FAIL;
     }
     free(buf);
+
+    if (cmd_move(value) != 0) {
+        httpd_resp_send_500(req);
+        return ESP_FAIL;
+    }
 
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
     return httpd_resp_send(req, NULL, 0);
