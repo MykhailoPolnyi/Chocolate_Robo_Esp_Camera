@@ -28,7 +28,8 @@ static esp_err_t parse_get(httpd_req_t *req, char **obuf)
         }
         free(buf);
     }
-    httpd_resp_send_400(req);
+    // 500 is sent only for testing, will be changes later
+    httpd_resp_send_500(req);
     return ESP_FAIL;
 }
 
