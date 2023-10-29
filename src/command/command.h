@@ -9,6 +9,6 @@
 
 int cmd_move(char* new_direction);
 
-extern char* direction;
+char* get_current_direction();
 
 #endif // ESP32_CAMERA_COMMAND

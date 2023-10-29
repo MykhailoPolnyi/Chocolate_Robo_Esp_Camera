@@ -57,11 +57,11 @@ int horizontalAngle = 5;
 int verticalStep = 5;
 int horizontalStep = 5;
 
-char* direction;
-
 // NO 'STOP' command hanling, as it should just stop the interrupt
 void IRAM_ATTR timer_interrupt(void* arg)
 {
+  char* direction = get_current_direction();
+
   Serial.println("Entering interrupt");
   if (direction == NULL) {
     Serial.println("Direction is null, no commands still received");
