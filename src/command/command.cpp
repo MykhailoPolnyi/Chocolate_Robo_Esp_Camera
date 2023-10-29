@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-char* direction = NULL;
+char* direction = SERVO_CMD_STOP;
 
 static void startTimer() {
     // TODO
