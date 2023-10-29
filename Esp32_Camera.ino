@@ -98,6 +98,7 @@ void setup() {
   horizontalServo.attach(HORIZONTAL_SERVO_PIN);
   horizontalServo.write(horizontalAngle);
 
+  setupTimer();
   startTimer();
 
   camera_config_t config;
