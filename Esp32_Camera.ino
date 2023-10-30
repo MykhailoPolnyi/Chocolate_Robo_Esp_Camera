@@ -38,7 +38,7 @@
 #include "src/command/command.h"
 #include "src/timer/timer.h"
 #define VERTICAL_SERVO_PIN 2
-#define HORIZONTAL_SERVO_PIN 4
+#define HORIZONTAL_SERVO_PIN 14
 
 // ===========================
 // Enter your WiFi credentials
@@ -69,30 +69,34 @@ void IRAM_ATTR timer_interrupt(void* arg)
   }
   Serial.print(", target direction: ");
   Serial.println(direction);
-  if (!strcmp(direction, SERVO_CMD_UP) && verticalAngle < 120) {
+  if (!strcmp(direction, SERVO_CMD_UP) && verticalAngle < 146) {
     verticalAngle += verticalStep;
     Serial.print("Moving up, new angle: ");
     Serial.println(verticalAngle);
+    verticalServo.write(verticalAngle);
   }
 
   if (!strcmp(direction, SERVO_CMD_DOWN) && verticalAngle > 0) {
     verticalAngle -= verticalStep;
     Serial.print("Moving down, new angle: ");
     Serial.println(verticalAngle);
+    verticalServo.write(verticalAngle);
   }
 
   // TODO: CHECK LEFT AND RIGHT ROTATION COMPARISONS
-  if (!strcmp(direction, SERVO_CMD_LEFT) && horizontalAngle < 120) {
+  if (!strcmp(direction, SERVO_CMD_LEFT) && horizontalAngle < 180) {
     horizontalAngle += horizontalStep;
     Serial.print("Moving left, new angle: ");
     Serial.println(horizontalAngle);
+    horizontalServo.write(horizontalAngle);
   }
 
   if (!strcmp(direction, SERVO_CMD_RIGHT) && horizontalAngle > 0) {
     horizontalAngle -= horizontalStep;
     Serial.print("Moving right, new angle: ");
     Serial.println(horizontalAngle);
-  }
+    horizontalServo.write(horizontalAngle);
+  }  
 }
 
 const esp_timer_create_args_t timer_args = {
