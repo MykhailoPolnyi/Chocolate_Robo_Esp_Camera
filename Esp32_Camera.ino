@@ -81,7 +81,6 @@ void IRAM_ATTR timer_interrupt(void* arg)
     Serial.println(verticalAngle);
   }
 
-  // TODO: CHECK LEFT AND RIGHT ROTATION COMPARISONS
   if (!strcmp(direction, SERVO_CMD_LEFT) && horizontalAngle < 120) {
     horizontalAngle += horizontalStep;
     Serial.print("Moving left, new angle: ");
