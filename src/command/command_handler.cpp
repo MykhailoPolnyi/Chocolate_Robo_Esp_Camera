@@ -47,12 +47,13 @@ static esp_err_t command_handler(httpd_req_t* req)
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to parse query");
         return ESP_FAIL;
     }
-    free(query);
 
     if (cmd_move(value) != 0) {
+        free(query);
         httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid action received");
         return ESP_FAIL;
     }
+    free(query);
 
     const char resp[] = "Command handled successfully";
 

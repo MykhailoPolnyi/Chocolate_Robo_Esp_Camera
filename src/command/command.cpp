@@ -20,7 +20,7 @@ int cmd_move(char *new_direction)
 
     for (int i = 0; i < sizeof(valid_commands); i++) {
         if (!strcmp(new_direction, valid_commands[i])) {
-            direction = new_direction;
+            direction = valid_commands[i];
             if (!strcmp(new_direction, SERVO_CMD_STOP)) {
                 stopTimer();
             } else {
