@@ -63,10 +63,12 @@ void IRAM_ATTR timer_interrupt(void* arg)
 {
   char* direction = get_current_direction();
 
-  Serial.println("Entering interrupt");
+  Serial.print("Entering interrupt");
   if (direction == NULL) {
-    Serial.println("Direction is null, no commands still received");
+    Serial.println("\nDirection is null, no commands still received");
   }
+  Serial.print(", target direction: ");
+  Serial.println(direction);
   if (!strcmp(direction, SERVO_CMD_UP) && verticalAngle < 120) {
     verticalAngle += verticalStep;
     Serial.print("Moving up, new angle: ");
