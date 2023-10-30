@@ -12,7 +12,7 @@ void setupTimer(const esp_timer_create_args_t timer_args)
 
 void startTimer()
 {
-  // ESP_ERROR_CHECK(esp_timer_start_periodic(timer, timer_period));
+  ESP_ERROR_CHECK(esp_timer_start_periodic(timer, timer_period));
 }
 
 void stopTimer()

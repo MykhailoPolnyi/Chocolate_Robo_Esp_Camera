@@ -24,7 +24,7 @@ int cmd_move(char *new_direction)
             if (!strcmp(new_direction, SERVO_CMD_STOP)) {
                 stopTimer();
             } else {
-                startTimer();
+                // startTimer();
             }
             return 0;
         }
