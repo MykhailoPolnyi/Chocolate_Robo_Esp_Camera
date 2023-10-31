@@ -37,6 +37,7 @@ bool isStreaming = false;
 #endif
 
 httpd_handle_t stream_httpd = NULL;
+httpd_handle_t command_httpd = NULL;
 
 #if CONFIG_LED_ILLUMINATOR_ENABLED
 void enable_led(bool en)
@@ -57,13 +58,20 @@ void startCameraServer()
 {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.max_uri_handlers = 16;
-    config.backlog_conn = 2;
 
     log_i("Starting stream server on port: '%d'", config.server_port);
     if (httpd_start(&stream_httpd, &config) == ESP_OK)
     {
         setupStreamHandler(stream_httpd);
-        setupCommandHandler(stream_httpd);
+    }
+
+    httpd_config_t command_server_config = HTTPD_DEFAULT_CONFIG();
+    command_server_config.server_port = 8081;
+    command_server_config.max_uri_handlers = 16;
+
+    if (httpd_start(&command_httpd, &command_server_config) == ESP_OK)
+    {
+        setupCommandHandler(command_httpd);
     }
 }
 
