@@ -116,7 +116,6 @@ void setup() {
   horizontalServo.write(horizontalAngle);
 
   setupTimer(timer_args);
-  startTimer();
 
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
