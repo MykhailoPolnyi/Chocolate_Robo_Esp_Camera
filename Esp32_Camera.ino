@@ -53,10 +53,10 @@ Servo verticalServo;
 Servo horizontalServo;
 
 // Servo control variables
-int verticalAngle = 5;
-int horizontalAngle = 5;
-int verticalStep = 5;
-int horizontalStep = 5;
+int verticalAngle = 0;
+int horizontalAngle = 0;
+int verticalStep = 1;
+int horizontalStep = 1;
 
 // NO 'STOP' command hanling, as it should just stop the interrupt
 void IRAM_ATTR timer_interrupt(void* arg)

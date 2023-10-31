@@ -3,7 +3,7 @@
 esp_timer_handle_t timer;
 
 // Set the timer period in microseconds (e.g., 1 second = 1000000 microseconds)
-int64_t timer_period = 1500000; // 15 miliseconds
+int64_t timer_period = 20000; // 0.2 second
 
 void setupTimer(const esp_timer_create_args_t timer_args)
 {
