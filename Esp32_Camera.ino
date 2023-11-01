@@ -38,7 +38,7 @@
 #include "src/command/command.h"
 #include "src/timer/timer.h"
 #define VERTICAL_SERVO_PIN 2
-#define HORIZONTAL_SERVO_PIN 4
+#define HORIZONTAL_SERVO_PIN 14
 
 // ===========================
 // Enter your WiFi credentials
@@ -53,43 +53,48 @@ Servo verticalServo;
 Servo horizontalServo;
 
 // Servo control variables
-int verticalAngle = 5;
-int horizontalAngle = 5;
-int verticalStep = 5;
-int horizontalStep = 5;
+int verticalAngle = 0;
+int horizontalAngle = 0;
+int verticalStep = 1;
+int horizontalStep = 1;
 
 // NO 'STOP' command hanling, as it should just stop the interrupt
 void IRAM_ATTR timer_interrupt(void* arg)
 {
   char* direction = get_current_direction();
 
-  Serial.println("Entering interrupt");
+  Serial.print("Entering interrupt");
   if (direction == NULL) {
-    Serial.println("Direction is null, no commands still received");
+    Serial.println("\nDirection is null, no commands still received");
   }
-  if (!strcmp(direction, SERVO_CMD_UP) && verticalAngle < 120) {
+  Serial.print(", target direction: ");
+  Serial.println(direction);
+  if (!strcmp(direction, SERVO_CMD_UP) && verticalAngle < 146) {
     verticalAngle += verticalStep;
     Serial.print("Moving up, new angle: ");
     Serial.println(verticalAngle);
+    verticalServo.write(verticalAngle);
   }
 
   if (!strcmp(direction, SERVO_CMD_DOWN) && verticalAngle > 0) {
     verticalAngle -= verticalStep;
     Serial.print("Moving down, new angle: ");
     Serial.println(verticalAngle);
+    verticalServo.write(verticalAngle);
   }
 
-  // TODO: CHECK LEFT AND RIGHT ROTATION COMPARISONS
-  if (!strcmp(direction, SERVO_CMD_LEFT) && horizontalAngle < 120) {
+  if (!strcmp(direction, SERVO_CMD_LEFT) && horizontalAngle < 180) {
     horizontalAngle += horizontalStep;
     Serial.print("Moving left, new angle: ");
     Serial.println(horizontalAngle);
+    horizontalServo.write(horizontalAngle);
   }
 
   if (!strcmp(direction, SERVO_CMD_RIGHT) && horizontalAngle > 0) {
     horizontalAngle -= horizontalStep;
     Serial.print("Moving right, new angle: ");
     Serial.println(horizontalAngle);
+    horizontalServo.write(horizontalAngle);
   }
 }
 
@@ -110,7 +115,6 @@ void setup() {
   horizontalServo.write(horizontalAngle);
 
   setupTimer(timer_args);
-  startTimer();
 
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
