@@ -76,7 +76,7 @@ void IRAM_ATTR timer_interrupt(void* arg)
     verticalServo.write(verticalAngle);
   }
 
-  if (!strcmp(direction, SERVO_CMD_UP) && verticalAngle > 0) {
+  if (!strcmp(direction, SERVO_CMD_DOWN) && verticalAngle > 0) {
     verticalAngle -= verticalStep;
     Serial.print("Moving down, new angle: ");
     Serial.println(verticalAngle);
