@@ -67,6 +67,7 @@ void startCameraServer()
 
     httpd_config_t command_server_config = HTTPD_DEFAULT_CONFIG();
     command_server_config.server_port = 8081;
+    command_server_config.ctrl_port = 8081;
     command_server_config.max_uri_handlers = 16;
 
     if (httpd_start(&command_httpd, &command_server_config) == ESP_OK)
