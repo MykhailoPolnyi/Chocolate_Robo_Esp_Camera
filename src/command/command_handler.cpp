@@ -5,13 +5,12 @@
 static esp_err_t parse_get(httpd_req_t *req, char **obuf)
 {
     char *buf = NULL;
-    size_t buf_len = 0;
+    size_t buf_len = httpd_req_get_url_query_len(req) + 1;
 
-    buf_len = httpd_req_get_url_query_len(req) + 1;
     if (buf_len > 1) {
         buf = (char *)malloc(buf_len);
         if (!buf) {
-            httpd_resp_send_500(req);
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to retrieve query from request");
             return ESP_FAIL;
         }
         if (httpd_req_get_url_query_str(req, buf, buf_len) == ESP_OK) {
@@ -19,35 +18,44 @@ static esp_err_t parse_get(httpd_req_t *req, char **obuf)
             return ESP_OK;
         }
         free(buf);
+    } else if (buf_len == 1) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Empty query received, cannot resolve command");
+        return ESP_FAIL;
     }
-    // 500 is sent only for testing, will be changes later
-    httpd_resp_send_500(req);
+
+    httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to retrieve query from request");
     return ESP_FAIL;
 }
 
 static esp_err_t command_handler(httpd_req_t* req)
 {
-    char *buf = NULL;
-    const char* cmd_option = "command";
-    char value[10];
+    char *query = NULL;
+    const char* cmd_option = "action";
+    char value[10] = {0};
 
-    if (parse_get(req, &buf) != ESP_OK) {
+    if (parse_get(req, &query) != ESP_OK) {
         return ESP_FAIL;
     }
 
-    if (httpd_query_key_value(buf, cmd_option, value, sizeof(value)) != ESP_OK) {
-        free(buf);
-        httpd_resp_send_500(req);
+    esp_err_t query_parse_result = httpd_query_key_value(query, cmd_option, value, sizeof(value));
+    if (query_parse_result == ESP_ERR_NOT_FOUND) {
+        free(query);
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "No action option received, cannot resolve command");
+        return ESP_FAIL;
+    } else if (query_parse_result != ESP_OK) {
+        free(query);
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to parse query");
         return ESP_FAIL;
     }
-    free(buf);
 
     if (cmd_move(value) != 0) {
-        httpd_resp_send_500(req);
+        free(query);
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid action received");
         return ESP_FAIL;
     }
+    free(query);
 
-    const char* resp = "Command handled successfully";
+    const char resp[] = "Command handled successfully";
 
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
     return httpd_resp_send(req, resp, sizeof(resp));
