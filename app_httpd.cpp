@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "esp_http_server.h"
-#include "esp_timer.h"
 
-#include "esp_camera.h"
 #include "esp32-hal-ledc.h"
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(CONFIG_ARDUHAL_ESP_LOG)
 #include "esp32-hal-log.h"
 #endif
 
-#include "stream_handler.h"
+#include "src/stream/stream_handler.h"
+#include "src/command/command_handler.h"
 
 // Enable LED FLASH setting
 #define CONFIG_LED_ILLUMINATOR_ENABLED 1
@@ -38,6 +37,7 @@ bool isStreaming = false;
 #endif
 
 httpd_handle_t stream_httpd = NULL;
+httpd_handle_t command_httpd = NULL;
 
 #if CONFIG_LED_ILLUMINATOR_ENABLED
 void enable_led(bool en)
@@ -64,9 +64,19 @@ void startCameraServer()
     {
         setupStreamHandler(stream_httpd);
     }
+
+    httpd_config_t command_server_config = HTTPD_DEFAULT_CONFIG();
+    command_server_config.server_port = 8081;
+    command_server_config.ctrl_port = 8081;
+    command_server_config.max_uri_handlers = 16;
+
+    if (httpd_start(&command_httpd, &command_server_config) == ESP_OK)
+    {
+        setupCommandHandler(command_httpd);
+    }
 }
 
-void setupLedFlash(int pin) 
+void setupLedFlash(int pin)
 {
     #if CONFIG_LED_ILLUMINATOR_ENABLED
     ledcSetup(LED_LEDC_CHANNEL, 5000, 8);
