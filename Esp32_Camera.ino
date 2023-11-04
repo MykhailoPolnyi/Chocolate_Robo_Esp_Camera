@@ -37,9 +37,11 @@
 #include "camera_pins.h"
 #include "src/command/command.h"
 #include "src/timer/timer.h"
+
 #define VERTICAL_SERVO_PIN 2
 #define HORIZONTAL_SERVO_PIN 14
-
+#define MAX_X_VALUE 180
+#define MAX_Y_VALUE 146
 // ===========================
 // Enter your WiFi credentials
 // ===========================
@@ -53,10 +55,13 @@ Servo verticalServo;
 Servo horizontalServo;
 
 // Servo control variables
-int verticalAngle = 0;
-int horizontalAngle = 0;
-int verticalStep = 1;
-int horizontalStep = 1;
+int xCurrentAngle = 0;
+int yCurrentAngle = 0;
+int xStep = 1;
+int yStep = 1;
+int xDestAngle = 0;
+int yDestAngle = 0;
+
 
 // NO 'STOP' command hanling, as it should just stop the interrupt
 void IRAM_ATTR timer_interrupt(void* arg)
@@ -65,36 +70,44 @@ void IRAM_ATTR timer_interrupt(void* arg)
 
   Serial.print("Entering interrupt");
   if (direction == NULL) {
+    xDestAngle = xCurrentAngle;
+    yDestAngle = yCurrentAngle;
     Serial.println("\nDirection is null, no commands still received");
   }
   Serial.print(", target direction: ");
   Serial.println(direction);
-  if (!strcmp(direction, SERVO_CMD_DOWN) && verticalAngle < 146) {
-    verticalAngle += verticalStep;
+  if (!strcmp(direction, SERVO_CMD_DOWN) && yDestAngle != MAX_Y_VALUE) {
+    yDestAngle = MAX_Y_VALUE;
     Serial.print("Moving down, new angle: ");
-    Serial.println(verticalAngle);
-    verticalServo.write(verticalAngle);
+    Serial.println(yCurrentAngle);
   }
 
-  if (!strcmp(direction, SERVO_CMD_UP) && verticalAngle > 0) {
-    verticalAngle -= verticalStep;
+  if (!strcmp(direction, SERVO_CMD_UP) && yDestAngle != 0) {
+    yDestAngle = 0;
     Serial.print("Moving up, new angle: ");
-    Serial.println(verticalAngle);
-    verticalServo.write(verticalAngle);
+    Serial.println(yCurrentAngle);
   }
 
-  if (!strcmp(direction, SERVO_CMD_LEFT) && horizontalAngle < 180) {
-    horizontalAngle += horizontalStep;
-    Serial.print("Moving left, new angle: ");
-    Serial.println(horizontalAngle);
-    horizontalServo.write(horizontalAngle);
-  }
-
-  if (!strcmp(direction, SERVO_CMD_RIGHT) && horizontalAngle > 0) {
-    horizontalAngle -= horizontalStep;
+  if (!strcmp(direction, SERVO_CMD_RIGHT) && xDestAngle != 0) {
+    xDestAngle = 0;
     Serial.print("Moving right, new angle: ");
-    Serial.println(horizontalAngle);
-    horizontalServo.write(horizontalAngle);
+    Serial.println(xCurrentAngle);
+  }
+
+  if (!strcmp(direction, SERVO_CMD_LEFT) && xDestAngle != MAX_X_VALUE) {
+    xDestAngle = MAX_X_VALUE;
+    Serial.print("Moving left, new angle: ");
+    Serial.println(xCurrentAngle);
+  }
+  
+  if (xCurrentAngle != xDestAngle) {
+    xCurrentAngle = (xCurrentAngle < xDestAngle) ? (xCurrentAngle + xStep) : (xCurrentAngle - xStep);
+    horizontalServo.write(xCurrentAngle);
+  }
+
+  if (yCurrentAngle != yDestAngle) {
+    yCurrentAngle = (yCurrentAngle < yDestAngle) ? (yCurrentAngle + yStep) : (yCurrentAngle - yStep);
+    verticalServo.write(yCurrentAngle);
   }
 }
 
@@ -110,9 +123,9 @@ void setup() {
 
   // Servos setup
   verticalServo.attach(VERTICAL_SERVO_PIN);
-  verticalServo.write(verticalAngle);
+  verticalServo.write(yCurrentAngle);
   horizontalServo.attach(HORIZONTAL_SERVO_PIN);
-  horizontalServo.write(horizontalAngle);
+  horizontalServo.write(xCurrentAngle);
 
   setupTimer(timer_args);
 
