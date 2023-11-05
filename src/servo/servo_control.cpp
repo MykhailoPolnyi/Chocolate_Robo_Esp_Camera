@@ -33,9 +33,9 @@ char* update_direction()
 
 int calc_next_x()
 {
-    if (x_current == x_dest) { return y_current; }
+    if (x_current == x_dest) { return x_current; }
     x_current = (x_current < x_dest) ? (x_current + x_step) : (x_current - x_step);
-    return y_current;
+    return x_current;
     
 }
 
