@@ -35,13 +35,12 @@
 
 // Custom code
 #include "camera_pins.h"
-#include "src/command/command.h"
 #include "src/timer/timer.h"
+#include "src/servo/servo_control.h"
 
 #define VERTICAL_SERVO_PIN 2
 #define HORIZONTAL_SERVO_PIN 14
-#define MAX_X_VALUE 180
-#define MAX_Y_VALUE 146
+
 // ===========================
 // Enter your WiFi credentials
 // ===========================
@@ -51,64 +50,18 @@ const char* password = "";
 void startCameraServer();
 void setupLedFlash(int pin);
 
-Servo verticalServo;
-Servo horizontalServo;
-
-// Servo control variables
-int xCurrentAngle = 0;
-int yCurrentAngle = 0;
-int xStep = 1;
-int yStep = 1;
-int xDestAngle = 0;
-int yDestAngle = 0;
+Servo vertical_servo;
+Servo horizontal_servo;
 
 
 // NO 'STOP' command hanling, as it should just stop the interrupt
 void IRAM_ATTR timer_interrupt(void* arg)
 {
-  char* direction = get_current_direction();
+  Serial.print("Current move command: ");
+  Serial.println(update_direction());
 
-  Serial.print("Entering interrupt");
-  if (direction == NULL) {
-    xDestAngle = xCurrentAngle;
-    yDestAngle = yCurrentAngle;
-    Serial.println("\nDirection is null, no commands still received");
-  }
-  Serial.print(", target direction: ");
-  Serial.println(direction);
-  if (!strcmp(direction, SERVO_CMD_DOWN) && yDestAngle != MAX_Y_VALUE) {
-    yDestAngle = MAX_Y_VALUE;
-    Serial.print("Moving down, new angle: ");
-    Serial.println(yCurrentAngle);
-  }
-
-  if (!strcmp(direction, SERVO_CMD_UP) && yDestAngle != 0) {
-    yDestAngle = 0;
-    Serial.print("Moving up, new angle: ");
-    Serial.println(yCurrentAngle);
-  }
-
-  if (!strcmp(direction, SERVO_CMD_RIGHT) && xDestAngle != 0) {
-    xDestAngle = 0;
-    Serial.print("Moving right, new angle: ");
-    Serial.println(xCurrentAngle);
-  }
-
-  if (!strcmp(direction, SERVO_CMD_LEFT) && xDestAngle != MAX_X_VALUE) {
-    xDestAngle = MAX_X_VALUE;
-    Serial.print("Moving left, new angle: ");
-    Serial.println(xCurrentAngle);
-  }
-  
-  if (xCurrentAngle != xDestAngle) {
-    xCurrentAngle = (xCurrentAngle < xDestAngle) ? (xCurrentAngle + xStep) : (xCurrentAngle - xStep);
-    horizontalServo.write(xCurrentAngle);
-  }
-
-  if (yCurrentAngle != yDestAngle) {
-    yCurrentAngle = (yCurrentAngle < yDestAngle) ? (yCurrentAngle + yStep) : (yCurrentAngle - yStep);
-    verticalServo.write(yCurrentAngle);
-  }
+  vertical_servo.write(calc_next_y());
+  horizontal_servo.write(calc_next_x());
 }
 
 const esp_timer_create_args_t timer_args = {
@@ -122,10 +75,10 @@ void setup() {
   Serial.println();
 
   // Servos setup
-  verticalServo.attach(VERTICAL_SERVO_PIN);
-  verticalServo.write(yCurrentAngle);
-  horizontalServo.attach(HORIZONTAL_SERVO_PIN);
-  horizontalServo.write(xCurrentAngle);
+  vertical_servo.attach(VERTICAL_SERVO_PIN);
+  vertical_servo.write(get_servo_y_coord());
+  horizontal_servo.attach(HORIZONTAL_SERVO_PIN);
+  horizontal_servo.write(get_servo_x_coord());
 
   setupTimer(timer_args);
 
