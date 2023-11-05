@@ -61,6 +61,30 @@ static esp_err_t command_handler(httpd_req_t* req)
     return httpd_resp_send(req, resp, sizeof(resp));
 }
 
+static esp_err_t refresh_recording_handler(httpd_req_t* req)
+{
+    int result = cmd_refresh_record();
+    if (!result) {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to refresh algorithm");
+        return ESP_FAIL;
+    }
+
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+    return httpd_resp_send(req, NULL, 0);
+}
+
+static esp_err_t save_point_handler(httpd_req_t* req)
+{
+    int result = cmd_add_point();
+    if (!result) {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to save point algorithm");
+        return ESP_FAIL;
+    }
+
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+    return httpd_resp_send(req, NULL, 0);
+}
+
 void setupCommandHandler(httpd_handle_t command_httpd)
 {
     httpd_uri_t command_uri = {
@@ -76,6 +100,33 @@ void setupCommandHandler(httpd_handle_t command_httpd)
 #endif
     };
 
-    httpd_register_uri_handler(command_httpd, &command_uri);
+    httpd_uri_t refresh_record_uri = {
+        .uri = "/record_refresh",
+        .method = HTTP_GET,
+        .handler = refresh_recording_handler,
+        .user_ctx = NULL
+#ifdef CONFIG_HTTPD_WS_SUPPORT
+        ,
+        .is_websocket = true,
+        .handle_ws_control_frames = false,
+        .supported_subprotocol = NULL
+#endif
+    };
 
+    httpd_uri_t add_point_uri = {
+        .uri = "/add_point",
+        .method = HTTP_GET,
+        .handler = save_point_handler,
+        .user_ctx = NULL
+#ifdef CONFIG_HTTPD_WS_SUPPORT
+        ,
+        .is_websocket = true,
+        .handle_ws_control_frames = false,
+        .supported_subprotocol = NULL
+#endif
+    };
+
+    httpd_register_uri_handler(command_httpd, &command_uri);
+    httpd_register_uri_handler(command_httpd, &refresh_record_uri);
+    httpd_register_uri_handler(command_httpd, &add_point_uri);
 }

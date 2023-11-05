@@ -3,19 +3,25 @@
 #include <cstring>
 
 #include "../timer/timer.h"
+#include "../algorithm/algorithm.h"
 
 char* direction = SERVO_CMD_STOP;
+
+// TODO: Replace with functions that give actual values
+static int get_servo_x_coord() { return 0; }
+static int get_servo_y_coord() { return 0; }
 
 int cmd_move(char *new_direction)
 {
     if (new_direction == NULL) return 1;
 
-    static char* valid_commands[5] = {
+    static char* valid_commands[] = {
         SERVO_CMD_DOWN,
         SERVO_CMD_UP,
         SERVO_CMD_LEFT,
         SERVO_CMD_RIGHT,
-        SERVO_CMD_STOP
+        SERVO_CMD_STOP,
+        SERVO_CMD_FOLLOW_ROUTE
     };
 
     for (int i = 0; i < sizeof(valid_commands); i++) {
@@ -30,6 +36,17 @@ int cmd_move(char *new_direction)
         }
     }
     return 1;
+}
+
+int cmd_refresh_record()
+{
+    start_algorithm_writing();
+    return 0;
+}
+
+int cmd_add_point()
+{
+    return add_new_point(get_servo_x_coord(), get_servo_y_coord());;
 }
 
 char *get_current_direction()
