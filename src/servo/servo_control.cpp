@@ -3,7 +3,7 @@
 
 #include <cstring>
 
-#define ON_DIRECTION(command, check, update) if (!strcmp(direction, command) && (check)) {update;}
+#define ON_DIRECTION(command, check, update) if (!strcmp(direction, command) && check) {update}
 
 // Servo control variables
 int x_current = 0;
@@ -23,10 +23,10 @@ char* update_direction()
         y_dest = y_current;
     }
     
-    ON_DIRECTION(SERVO_CMD_DOWN, y_dest != MAX_Y_VALUE, y_dest = MAX_Y_VALUE)
-    ON_DIRECTION(SERVO_CMD_UP, y_dest != 0, y_dest = 0)
-    ON_DIRECTION(SERVO_CMD_RIGHT, x_dest != 0, x_dest = 0)
-    ON_DIRECTION(SERVO_CMD_LEFT, x_dest != MAX_X_VALUE, x_dest = MAX_X_VALUE)
+    ON_DIRECTION(SERVO_CMD_DOWN, (y_dest != MAX_Y_VALUE), y_dest = MAX_Y_VALUE; x_dest = x_current;)
+    ON_DIRECTION(SERVO_CMD_UP, (y_dest != 0), y_dest = 0; x_dest = x_current;)
+    ON_DIRECTION(SERVO_CMD_RIGHT, (x_dest != 0), x_dest = 0; y_dest = y_current;)
+    ON_DIRECTION(SERVO_CMD_LEFT, (x_dest != MAX_X_VALUE), x_dest = MAX_X_VALUE; y_dest = y_current;)
 
     return direction;
 }
