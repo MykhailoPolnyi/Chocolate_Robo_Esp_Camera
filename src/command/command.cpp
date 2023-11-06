@@ -39,12 +39,15 @@ int cmd_move(char *new_direction)
 int cmd_refresh_record()
 {
     start_algorithm_writing();
+    update_path();
     return 0;
 }
 
 int cmd_add_point()
 {
-    return add_new_point(get_servo_x_coord(), get_servo_y_coord());
+    add_new_point(get_servo_x_coord(), get_servo_y_coord());
+    update_path();
+    return 0;
 }
 
 char *get_current_direction()
