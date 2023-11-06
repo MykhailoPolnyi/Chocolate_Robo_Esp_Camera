@@ -1,6 +1,7 @@
 #include "servo_control.h"
 #include "../command/command.h"
 #include "../preference/movement.h"
+#include "malloc.h"
 
 #include <cstring>
 
@@ -13,13 +14,16 @@ int x_step = 1;
 int y_step = 1;
 int x_dest = 0;
 int y_dest = 0;
-int* x_path_arr;
-int* y_path_arr;
-int path_size;
+int* x_path_arr = (int *)malloc(3 * sizeof(int));
+int* y_path_arr = (int *)malloc(3*sizeof(int));
+int path_size = 3;
 
 void update_path()
 {
-    path_size = read_movement_algorithm(&x_path_arr, &y_path_arr);
+    // path_size = read_movement_algorithm(&x_path_arr, &y_path_arr);
+    x_path_arr[0] = y_path_arr[0] = 20;
+    x_path_arr[1] = y_path_arr[1] = 60;
+    x_path_arr[2] = y_path_arr[2] = 40;
 }
 
 char* update_direction()
