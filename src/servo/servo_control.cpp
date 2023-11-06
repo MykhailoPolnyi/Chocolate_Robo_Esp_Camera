@@ -21,9 +21,12 @@ int current_path_point = 0;
 void update_path()
 {
     // path_size = read_movement_algorithm(&x_path_arr, &y_path_arr);
-    x_path_arr[0] = y_path_arr[0] = 20;
-    x_path_arr[1] = y_path_arr[1] = 60;
-    x_path_arr[2] = y_path_arr[2] = 40;
+    x_path_arr[0] = 20;
+    y_path_arr[0] = 20;
+    x_path_arr[1] = 60;
+    y_path_arr[1] = 60;
+    x_path_arr[2] = 40;
+    y_path_arr[2] = 40;
 }
 
 char* update_direction()
