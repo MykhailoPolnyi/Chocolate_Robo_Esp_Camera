@@ -69,19 +69,12 @@ char* update_direction()
         {
             update_path();
             current_path_point = 0;
-        }
-        
-        if (current_path_point >= path_size || x_path_arr == NULL || y_path_arr == NULL)
-        {
-            y_dest = y_current;
-            x_dest = x_current;
-            current_path_point = 0;
             return direction;
         }
 
         if (x_current == x_dest && y_current == y_dest)
         {
-            current_path_point = (current_path_point == path_size-1) ? 0 : current_path_point++;
+            current_path_point = (current_path_point == path_size-1) ? 0 : current_path_point+1;
         }
 
         if (x_dest != x_path_arr[current_path_point] && y_dest != y_path_arr[current_path_point]) 
@@ -98,7 +91,6 @@ int calc_next_x()
     if (x_current == x_dest) { return x_current; }
     x_current = (x_current < x_dest) ? (x_current + x_step) : (x_current - x_step);
     return x_current;
-    
 }
 
 int calc_next_y()
