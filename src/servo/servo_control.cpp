@@ -1,5 +1,6 @@
 #include "servo_control.h"
 #include "../command/command.h"
+#include "../preference/movement.h"
 
 #include <cstring>
 
@@ -12,6 +13,14 @@ int x_step = 1;
 int y_step = 1;
 int x_dest = 0;
 int y_dest = 0;
+int* x_path_arr;
+int* y_path_arr;
+int path_size;
+
+void update_path()
+{
+    path_size = read_movement_algorithm(&x_path_arr, &y_path_arr);
+}
 
 char* update_direction()
 {
@@ -28,6 +37,34 @@ char* update_direction()
     ON_DIRECTION(SERVO_CMD_RIGHT, (x_dest != 0), x_dest = 0; y_dest = y_current;)
     ON_DIRECTION(SERVO_CMD_LEFT, (x_dest != MAX_X_VALUE), x_dest = MAX_X_VALUE; y_dest = y_current;)
 
+    static int current_path_point = 0;
+    if (!strcmp(direction, SERVO_CMD_FOLLOW_ROUTE)) 
+    {
+        if (x_path_arr == NULL || y_path_arr == NULL)
+        {
+            update_path();
+            current_path_point = 0;
+        }
+        
+        if (current_path_point >= path_size || x_path_arr == NULL || y_path_arr == NULL)
+        {
+            y_dest = y_current;
+            x_dest = x_current;
+            return direction;
+        }
+
+        if (x_current == x_dest && y_current == y_dest)
+        {
+            current_path_point = (current_path_point == path_size-1) ? 0 : current_path_point++;
+        }
+
+        if (x_dest != x_path_arr[current_path_point] && y_dest != y_path_arr[current_path_point]) 
+        {
+            x_dest = x_path_arr[current_path_point];
+            y_dest = y_path_arr[current_path_point];
+        }
+
+    }
     return direction;
 }
 

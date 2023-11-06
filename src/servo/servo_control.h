@@ -4,6 +4,8 @@
 #define MAX_X_VALUE 180
 #define MAX_Y_VALUE 146
 
+void update_path();
+
 char* update_direction();
 
 int calc_next_x();
