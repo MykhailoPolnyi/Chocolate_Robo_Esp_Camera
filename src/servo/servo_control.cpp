@@ -5,8 +5,6 @@
 
 #include <cstring>
 
-#define ON_DIRECTION(command, check, update) if (!strcmp(direction, command) && check) {update}
-
 // Servo control variables
 int x_current = 0;
 int y_current = 0;
@@ -14,9 +12,11 @@ int x_step = 1;
 int y_step = 1;
 int x_dest = 0;
 int y_dest = 0;
+
 int* x_path_arr = (int *)malloc(3 * sizeof(int));
 int* y_path_arr = (int *)malloc(3*sizeof(int));
 int path_size = 3;
+int current_path_point = 0;
 
 void update_path()
 {
@@ -32,16 +32,34 @@ char* update_direction()
 
     if (direction == NULL)
     {
-        x_dest = x_current;
+        x_dest = x_current; 
         y_dest = y_current;
     }
-    
-    ON_DIRECTION(SERVO_CMD_DOWN, (y_dest != MAX_Y_VALUE || x_dest != x_current), y_dest = MAX_Y_VALUE; x_dest = x_current;)
-    ON_DIRECTION(SERVO_CMD_UP, (y_dest != 0 || x_dest != x_current), y_dest = 0; x_dest = x_current;)
-    ON_DIRECTION(SERVO_CMD_RIGHT, (x_dest != 0 || y_dest != y_current), x_dest = 0; y_dest = y_current;)
-    ON_DIRECTION(SERVO_CMD_LEFT, (x_dest != MAX_X_VALUE || y_dest != y_current), x_dest = MAX_X_VALUE; y_dest = y_current;)
 
-    static int current_path_point = 0;
+    if (!strcmp(direction, SERVO_CMD_DOWN) && (y_dest != MAX_Y_VALUE || x_dest != x_current)) 
+    {
+        y_dest = MAX_Y_VALUE;
+        x_dest = x_current;
+    }
+
+    if (!strcmp(direction, SERVO_CMD_UP) && (y_dest != 0 || x_dest != x_current)) 
+    {
+        y_dest = 0;
+        x_dest = x_current;
+    }
+
+    if (!strcmp(direction, SERVO_CMD_RIGHT) && (x_dest != 0 || y_dest != y_current)) 
+    {
+        x_dest = 0;
+        y_dest != y_current;
+    }
+
+    if (!strcmp(direction, SERVO_CMD_LEFT) && (x_dest != MAX_X_VALUE || y_dest != y_current)) 
+    {
+        x_dest = MAX_X_VALUE;
+        y_dest != y_current;
+    }
+    
     if (!strcmp(direction, SERVO_CMD_FOLLOW_ROUTE)) 
     {
         if (x_path_arr == NULL || y_path_arr == NULL)
@@ -54,6 +72,7 @@ char* update_direction()
         {
             y_dest = y_current;
             x_dest = x_current;
+            current_path_point = 0;
             return direction;
         }
 
@@ -67,7 +86,6 @@ char* update_direction()
             x_dest = x_path_arr[current_path_point];
             y_dest = y_path_arr[current_path_point];
         }
-
     }
     return direction;
 }
