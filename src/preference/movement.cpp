@@ -28,9 +28,11 @@ int read_movement_algorithm(int** x_axis_points_dest, int** y_axis_points_dest)
 
     unsigned int alg_size = movement.getUInt(MOVEMENT_PREF_LENGTH, 0);
     if (alg_size == 0) return alg_size;
+    *x_axis_points_dest = (int*) malloc(alg_size * sizeof(int));
+    *y_axis_points_dest = (int*) malloc(alg_size * sizeof(int));
 
-    *x_axis_points_dest = (int*) movement.getBytes(MOVEMENT_PREF_X_AXIS, NULL, alg_size);
-    *y_axis_points_dest = (int*) movement.getBytes(MOVEMENT_PREF_Y_AXIS, NULL, alg_size);
+    (int*) movement.getBytes(MOVEMENT_PREF_X_AXIS, *x_axis_points_dest, alg_size);
+    (int*) movement.getBytes(MOVEMENT_PREF_Y_AXIS, *y_axis_points_dest, alg_size);
 
     movement.end();
 

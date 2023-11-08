@@ -19,6 +19,8 @@ int current_path_point = 0;
 
 void update_path()
 {
+    free(x_path_arr);
+    free(y_path_arr);
     path_size = read_movement_algorithm(&x_path_arr, &y_path_arr);
 }
 
