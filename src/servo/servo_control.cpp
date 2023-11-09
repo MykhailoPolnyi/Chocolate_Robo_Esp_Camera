@@ -30,35 +30,35 @@ char* update_direction()
 
     if (direction == NULL)
     {
-        x_dest = x_current; 
+        x_dest = x_current;
         y_dest = y_current;
     }
 
-    if (!strcmp(direction, SERVO_CMD_DOWN) && (y_dest != MAX_Y_VALUE || x_dest != x_current)) 
+    if (!strcmp(direction, SERVO_CMD_DOWN) && (y_dest != MAX_Y_VALUE || x_dest != x_current))
     {
         y_dest = MAX_Y_VALUE;
         x_dest = x_current;
     }
 
-    if (!strcmp(direction, SERVO_CMD_UP) && (y_dest != 0 || x_dest != x_current)) 
+    if (!strcmp(direction, SERVO_CMD_UP) && (y_dest != 0 || x_dest != x_current))
     {
         y_dest = 0;
         x_dest = x_current;
     }
 
-    if (!strcmp(direction, SERVO_CMD_RIGHT) && (x_dest != 0 || y_dest != y_current)) 
+    if (!strcmp(direction, SERVO_CMD_RIGHT) && (x_dest != 0 || y_dest != y_current))
     {
         x_dest = 0;
         y_dest = y_current;
     }
 
-    if (!strcmp(direction, SERVO_CMD_LEFT) && (x_dest != MAX_X_VALUE || y_dest != y_current)) 
+    if (!strcmp(direction, SERVO_CMD_LEFT) && (x_dest != MAX_X_VALUE || y_dest != y_current))
     {
         x_dest = MAX_X_VALUE;
         y_dest = y_current;
     }
-    
-    if (!strcmp(direction, SERVO_CMD_FOLLOW_ROUTE)) 
+
+    if (!strcmp(direction, SERVO_CMD_FOLLOW_ROUTE))
     {
         if (x_path_arr == NULL || y_path_arr == NULL)
         {
@@ -72,9 +72,12 @@ char* update_direction()
             current_path_point = (current_path_point == path_size-1) ? 0 : current_path_point+1;
         }
 
-        if (x_dest != x_path_arr[current_path_point] && y_dest != y_path_arr[current_path_point]) 
-        {
+        if (x_dest != x_path_arr[current_path_point]) {
             x_dest = x_path_arr[current_path_point];
+        }
+
+        if (y_dest != y_path_arr[current_path_point])
+        {
             y_dest = y_path_arr[current_path_point];
         }
     }
