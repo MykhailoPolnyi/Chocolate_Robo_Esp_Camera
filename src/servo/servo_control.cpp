@@ -22,6 +22,8 @@ void update_path()
 {
     free(x_path_arr);
     free(y_path_arr);
+    x_path_arr = NULL;
+    y_path_arr = NULL;
     path_size = read_movement_algorithm(&x_path_arr, &y_path_arr);
 }
 
