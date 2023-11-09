@@ -25,6 +25,41 @@ void update_path()
     path_size = read_movement_algorithm(&x_path_arr, &y_path_arr);
 }
 
+void set_path_dest()
+{
+    if (x_path_arr == NULL || y_path_arr == NULL)
+        {
+            update_path();
+            delay_counter = 0;
+            return;
+        }
+
+        if (current_path_point > path_size)
+        {
+            current_path_point = 0;
+        }
+
+        if (x_current == x_dest && y_current == y_dest)
+        {
+            delay_counter++;
+            if(delay_counter == DELAY_1_SECOND)
+            {
+                current_path_point = (current_path_point == path_size-1) ? 0 : current_path_point+1;
+                delay_counter = 0;
+            }
+        }
+
+        if (x_dest != x_path_arr[current_path_point]) 
+        {
+            x_dest = x_path_arr[current_path_point];
+        }
+
+        if (y_dest != y_path_arr[current_path_point])
+        {
+            y_dest = y_path_arr[current_path_point];
+        }
+}
+
 char* update_direction()
 {
     char* direction = get_current_direction();
@@ -61,32 +96,9 @@ char* update_direction()
 
     if (!strcmp(direction, SERVO_CMD_FOLLOW_ROUTE))
     {
-        if (x_path_arr == NULL || y_path_arr == NULL)
-        {
-            update_path();
-            current_path_point = 0;
-            return direction;
-        }
-
-        if (x_current == x_dest && y_current == y_dest)
-        {
-            delay_counter++;
-            if(delay_counter == DELAY_1_SECOND)
-            {
-                current_path_point = (current_path_point == path_size-1) ? 0 : current_path_point+1;
-                delay_counter = 0;
-            }
-        }
-
-        if (x_dest != x_path_arr[current_path_point]) {
-            x_dest = x_path_arr[current_path_point];
-        }
-
-        if (y_dest != y_path_arr[current_path_point])
-        {
-            y_dest = y_path_arr[current_path_point];
-        }
+        set_path_dest();
     }
+
     return direction;
 }
 
