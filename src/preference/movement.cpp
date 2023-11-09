@@ -22,6 +22,11 @@ void save_movement_algorithm(int* x_axis_points, int* y_axis_points, unsigned in
     movement.end();
 }
 
+void clear_movement_algorithm()
+{
+    save_movement_algorithm(NULL, NULL, 0);
+}
+
 int read_movement_algorithm(int** x_axis_points_dest, int** y_axis_points_dest)
 {
     movement.begin(MOVEMENT_SPACENAME, true);

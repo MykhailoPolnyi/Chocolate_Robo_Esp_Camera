@@ -49,13 +49,13 @@ char* update_direction()
     if (!strcmp(direction, SERVO_CMD_RIGHT) && (x_dest != 0 || y_dest != y_current)) 
     {
         x_dest = 0;
-        y_dest != y_current;
+        y_dest = y_current;
     }
 
     if (!strcmp(direction, SERVO_CMD_LEFT) && (x_dest != MAX_X_VALUE || y_dest != y_current)) 
     {
         x_dest = MAX_X_VALUE;
-        y_dest != y_current;
+        y_dest = y_current;
     }
     
     if (!strcmp(direction, SERVO_CMD_FOLLOW_ROUTE)) 
