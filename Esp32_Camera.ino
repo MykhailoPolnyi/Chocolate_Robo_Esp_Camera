@@ -70,6 +70,12 @@ const esp_timer_create_args_t timer_args = {
     .name = "servo_timer",
 };
 
+void write_movement_algo() {
+  int x[] = { 100, 40, 70 };
+  int y[] = { 60, 30, 90 };
+  save_movement_algorithm(x, y, 3);
+}
+
 void print_movement_algo() {
   Serial.println("Testing movement preferene");
   int* x_arr = NULL;
@@ -83,6 +89,8 @@ void print_movement_algo() {
     }
   }
   Serial.println("Pref print finished");
+  free(x_arr);
+  free(y_arr);
 }
 
 void setup() {
@@ -146,6 +154,7 @@ void setup() {
   pinMode(14, INPUT_PULLUP);
 #endif
 
+  write_movement_algo();
   print_movement_algo();
 
   // camera init
