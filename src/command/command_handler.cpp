@@ -64,7 +64,7 @@ static esp_err_t command_handler(httpd_req_t* req)
 static esp_err_t refresh_recording_handler(httpd_req_t* req)
 {
     int result = cmd_refresh_record();
-    if (!result) {
+    if (result) {
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to refresh algorithm");
         return ESP_FAIL;
     }
@@ -76,7 +76,7 @@ static esp_err_t refresh_recording_handler(httpd_req_t* req)
 static esp_err_t save_point_handler(httpd_req_t* req)
 {
     int result = cmd_add_point();
-    if (!result) {
+    if (result) {
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to save point algorithm");
         return ESP_FAIL;
     }
