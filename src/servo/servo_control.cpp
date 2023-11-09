@@ -16,6 +16,7 @@ int* x_path_arr;
 int* y_path_arr;
 int path_size;
 int current_path_point = 0;
+int delay_counter = 0;
 
 void update_path()
 {
@@ -69,7 +70,12 @@ char* update_direction()
 
         if (x_current == x_dest && y_current == y_dest)
         {
-            current_path_point = (current_path_point == path_size-1) ? 0 : current_path_point+1;
+            delay_counter++;
+            if(delay_counter == DELAY_1_SECOND)
+            {
+                current_path_point = (current_path_point == path_size-1) ? 0 : current_path_point+1;
+                delay_counter = 0;
+            }
         }
 
         if (x_dest != x_path_arr[current_path_point]) {

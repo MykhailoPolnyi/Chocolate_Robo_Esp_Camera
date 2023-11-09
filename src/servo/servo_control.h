@@ -4,6 +4,8 @@
 #define MAX_X_VALUE 180
 #define MAX_Y_VALUE 146
 
+#define DELAY_1_SECOND 50
+
 void update_path();
 
 char* update_direction();
