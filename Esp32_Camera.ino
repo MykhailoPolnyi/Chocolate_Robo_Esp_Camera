@@ -37,6 +37,7 @@
 #include "camera_pins.h"
 #include "src/timer/timer.h"
 #include "src/servo/servo_control.h"
+#include "src/preference/movement.h"
 
 #define VERTICAL_SERVO_PIN 2
 #define HORIZONTAL_SERVO_PIN 14
@@ -68,6 +69,21 @@ const esp_timer_create_args_t timer_args = {
     .callback = &timer_interrupt,
     .name = "servo_timer",
 };
+
+void print_movement_algo() {
+  Serial.println("Testing movement preferene");
+  int* x_arr = NULL;
+  int* y_arr = NULL;
+  int arr_size = read_movement_algorithm(&x_arr, &y_arr);
+  if (arr_size == 0) {
+    Serial.println("Preference is empty");
+  } else {
+    for (int i = 0; i < arr_size; i++) {
+      Serial.printf("P %d: x=%d y=%d\n", i, x_arr[i], y_arr[i]);
+    }
+  }
+  Serial.println("Pref print finished");
+}
 
 void setup() {
   Serial.begin(115200);
@@ -130,6 +146,8 @@ void setup() {
   pinMode(14, INPUT_PULLUP);
 #endif
 
+  print_movement_algo();
+
   // camera init
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK) {
@@ -182,4 +200,5 @@ void setup() {
 void loop() {
   // Do nothing. Everything is done in another task by the web server
   delay(10000);
+  print_movement_algo();
 }
