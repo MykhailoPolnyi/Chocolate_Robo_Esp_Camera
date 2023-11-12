@@ -21,6 +21,7 @@
 
 #include "src/stream/stream_handler.h"
 #include "src/command/command_handler.h"
+#include "src/access_point/access_point.h"
 
 // Enable LED FLASH setting
 #define CONFIG_LED_ILLUMINATOR_ENABLED 1

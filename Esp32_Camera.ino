@@ -37,17 +37,15 @@
 #include "camera_pins.h"
 #include "src/timer/timer.h"
 #include "src/servo/servo_control.h"
+#include "src/preference/movement.h"
+#include "src/preference/wifi_pref.h"
+#include "src/access_point/access_point.h"
 
 #define VERTICAL_SERVO_PIN 2
 #define HORIZONTAL_SERVO_PIN 14
 
-// ===========================
-// Enter your WiFi credentials
-// ===========================
-const char* ssid = "";
-const char* password = "";
+bool ap_running = false;
 
-void startCameraServer();
 void setupLedFlash(int pin);
 
 Servo vertical_servo;
@@ -60,14 +58,41 @@ void IRAM_ATTR timer_interrupt(void* arg)
   Serial.print("Current move command: ");
   Serial.println(update_direction());
 
-  vertical_servo.write(calc_next_y());
-  horizontal_servo.write(calc_next_x());
+  int x = calc_next_x();
+  int y = calc_next_y();
+  vertical_servo.write(y);
+  horizontal_servo.write(x);
+  Serial.printf("X: %d", x);
+  Serial.printf("Y: %d", y);
 }
 
 const esp_timer_create_args_t timer_args = {
     .callback = &timer_interrupt,
     .name = "servo_timer",
 };
+
+void write_movement_algo() {
+  int x[] = { 100, 40, 70 };
+  int y[] = { 60, 30, 90 };
+  save_movement_algorithm(x, y, 3);
+}
+
+void print_movement_algo() {
+  Serial.println("Testing movement preferene");
+  int* x_arr = NULL;
+  int* y_arr = NULL;
+  int arr_size = read_movement_algorithm(&x_arr, &y_arr);
+  if (arr_size == 0) {
+    Serial.println("Preference is empty");
+  } else {
+    for (int i = 0; i < arr_size; i++) {
+      Serial.printf("P %d: x=%d y=%d\n", i, x_arr[i], y_arr[i]);
+    }
+  }
+  Serial.println("Pref print finished");
+  free(x_arr);
+  free(y_arr);
+}
 
 void setup() {
   Serial.begin(115200);
@@ -130,6 +155,9 @@ void setup() {
   pinMode(14, INPUT_PULLUP);
 #endif
 
+  write_movement_algo();
+  print_movement_algo();
+
   // camera init
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK) {
@@ -162,24 +190,20 @@ void setup() {
 #if defined(LED_GPIO_NUM)
   setupLedFlash(LED_GPIO_NUM);
 #endif
-
-  WiFi.begin(ssid, password);
-  WiFi.setSleep(false);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("\nWiFi connected");
-
-  startCameraServer();
-
-  Serial.print("Camera Ready! Use 'http://");
-  Serial.print(WiFi.localIP());
-  Serial.println("' to connect");
+  wifi_connection_attempt();
+  check_wifi_status(ap_running);
+  
 }
 
 void loop() {
-  // Do nothing. Everything is done in another task by the web server
-  delay(10000);
+  if(ap_running){
+    if(client_request_listener(ap_running)){
+      Serial.println("Listener stopped...");
+    }
+  } else {
+    // Do nothing. Everything is done in another task by the web server
+    delay(10000);
+    if (WiFi.status() != WL_CONNECTED)
+      check_wifi_status(ap_running);
+  }
 }
