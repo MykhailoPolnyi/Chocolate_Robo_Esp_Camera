@@ -1,6 +1,7 @@
-#include "wifi.h"
+#include "wifi_pref.h"
 
 #include <Preferences.h>
+#include <WiFi.h>
 
 #define WIFI_SPACENAME "wifi"
 #define WIFI_PREF_SSID "ssid"
@@ -8,7 +9,7 @@
 
 Preferences wifi;
 
-void save_wifi(char *ssid, char *pswd)
+void save_wifi(String ssid, String pswd)
 {
     wifi.begin(WIFI_SPACENAME, false);
 
@@ -20,18 +21,18 @@ void save_wifi(char *ssid, char *pswd)
     wifi.end();
 }
 
-const char* get_wifi_ssid()
+String get_wifi_ssid()
 {
     wifi.begin(WIFI_SPACENAME, true);
-    const char* ssid = wifi.getString(WIFI_PREF_SSID, "").c_str();
+    String ssid = wifi.getString(WIFI_PREF_SSID, "");
     wifi.end();
     return ssid;
 }
 
-const char* get_wifi_pswd()
+String get_wifi_pswd()
 {
     wifi.begin(WIFI_SPACENAME, true);
-    const char* pswd = wifi.getString(WIFI_PREF_PSWD, "").c_str();
+    String pswd = wifi.getString(WIFI_PREF_PSWD, "");
     wifi.end();
     return pswd;
 }
