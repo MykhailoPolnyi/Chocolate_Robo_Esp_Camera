@@ -4,12 +4,10 @@
 
 #include "../timer/timer.h"
 #include "../algorithm/algorithm.h"
+#include "../servo/servo_control.h"
 
 char* direction = SERVO_CMD_STOP;
 
-// TODO: Replace with functions that give actual values
-static int get_servo_x_coord() { return 0; }
-static int get_servo_y_coord() { return 0; }
 
 int cmd_move(char *new_direction)
 {
@@ -41,12 +39,15 @@ int cmd_move(char *new_direction)
 int cmd_refresh_record()
 {
     start_algorithm_writing();
+    update_path();
     return 0;
 }
 
 int cmd_add_point()
 {
-    return add_new_point(get_servo_x_coord(), get_servo_y_coord());;
+    add_new_point(get_servo_x_coord(), get_servo_y_coord());
+    update_path();
+    return 0;
 }
 
 char *get_current_direction()

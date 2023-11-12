@@ -18,6 +18,7 @@ void start_algorithm_writing()
     free(y_axis_array);
     x_axis_array = NULL;
     y_axis_array = NULL;
+    clear_movement_algorithm();
 }
 
 int add_new_point(int x, int y)

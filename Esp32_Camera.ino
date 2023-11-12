@@ -35,8 +35,9 @@
 
 // Custom code
 #include "camera_pins.h"
-#include "src/command/command.h"
 #include "src/timer/timer.h"
+#include "src/servo/servo_control.h"
+
 #define VERTICAL_SERVO_PIN 2
 #define HORIZONTAL_SERVO_PIN 14
 
@@ -49,53 +50,18 @@ const char* password = "";
 void startCameraServer();
 void setupLedFlash(int pin);
 
-Servo verticalServo;
-Servo horizontalServo;
+Servo vertical_servo;
+Servo horizontal_servo;
 
-// Servo control variables
-int verticalAngle = 0;
-int horizontalAngle = 0;
-int verticalStep = 1;
-int horizontalStep = 1;
 
 // NO 'STOP' command hanling, as it should just stop the interrupt
 void IRAM_ATTR timer_interrupt(void* arg)
 {
-  char* direction = get_current_direction();
+  Serial.print("Current move command: ");
+  Serial.println(update_direction());
 
-  Serial.print("Entering interrupt");
-  if (direction == NULL) {
-    Serial.println("\nDirection is null, no commands still received");
-  }
-  Serial.print(", target direction: ");
-  Serial.println(direction);
-  if (!strcmp(direction, SERVO_CMD_DOWN) && verticalAngle < 146) {
-    verticalAngle += verticalStep;
-    Serial.print("Moving down, new angle: ");
-    Serial.println(verticalAngle);
-    verticalServo.write(verticalAngle);
-  }
-
-  if (!strcmp(direction, SERVO_CMD_UP) && verticalAngle > 0) {
-    verticalAngle -= verticalStep;
-    Serial.print("Moving up, new angle: ");
-    Serial.println(verticalAngle);
-    verticalServo.write(verticalAngle);
-  }
-
-  if (!strcmp(direction, SERVO_CMD_LEFT) && horizontalAngle < 180) {
-    horizontalAngle += horizontalStep;
-    Serial.print("Moving left, new angle: ");
-    Serial.println(horizontalAngle);
-    horizontalServo.write(horizontalAngle);
-  }
-
-  if (!strcmp(direction, SERVO_CMD_RIGHT) && horizontalAngle > 0) {
-    horizontalAngle -= horizontalStep;
-    Serial.print("Moving right, new angle: ");
-    Serial.println(horizontalAngle);
-    horizontalServo.write(horizontalAngle);
-  }
+  vertical_servo.write(calc_next_y());
+  horizontal_servo.write(calc_next_x());
 }
 
 const esp_timer_create_args_t timer_args = {
@@ -109,10 +75,10 @@ void setup() {
   Serial.println();
 
   // Servos setup
-  verticalServo.attach(VERTICAL_SERVO_PIN);
-  verticalServo.write(verticalAngle);
-  horizontalServo.attach(HORIZONTAL_SERVO_PIN);
-  horizontalServo.write(horizontalAngle);
+  vertical_servo.attach(VERTICAL_SERVO_PIN);
+  vertical_servo.write(get_servo_y_coord());
+  horizontal_servo.attach(HORIZONTAL_SERVO_PIN);
+  horizontal_servo.write(get_servo_x_coord());
 
   setupTimer(timer_args);
 
